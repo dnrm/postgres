@@ -13,6 +13,11 @@ const client = new Client({
 
 client.connect();
 
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    return next();
+});
+
 app.get("/", async (req, res) => {
     request.get(
         "https://goquotes-api.herokuapp.com/api/v1/random?count=1",
