@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Client, Pool } = require("pg");
 const app = require("express")();
 const request = require("request");
+const cors = require('cors');
 
 const client = new Client({
     user: process.env.PG_USER,
@@ -13,10 +14,7 @@ const client = new Client({
 
 client.connect();
 
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    return next();
-});
+app.use(cors());
 
 app.get("/", async (req, res) => {
     request.get(
