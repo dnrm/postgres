@@ -3,6 +3,7 @@ const { Client, Pool } = require("pg");
 const app = require("express")();
 const request = require("request");
 const cors = require('cors');
+const PORT = process.env.PORT || 9090;
 
 const client = new Client({
     user: process.env.PG_USER,
@@ -38,4 +39,4 @@ app.get("/users", async (req, res) => {
     });
 });
 
-app.listen(9090, () => console.log(`http://localhost:9090`));
+app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
