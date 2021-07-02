@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { Client, Pool } = require("pg");
-const app = require("express")();
+const express = require('express');
+const app = express();
 const request = require("request");
 const cors = require('cors');
 const PORT = process.env.PORT || 9090;
@@ -16,6 +17,7 @@ const client = new Client({
 client.connect();
 
 app.use(cors());
+app.use(express.json())
 
 app.get("/", async (req, res) => {
     request.get(
@@ -30,13 +32,46 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/users", async (req, res) => {
-    await client.query("SELECT * FROM dnrm", (err, response) => {
-        if (!err) {
-            res.send(response.rows);
-        } else {
-            res.send(err);
-        }
-    });
+    try {
+        await client.query("SELECT * FROM dnrm", (err, response) => {
+            if (!err) {
+                res.send(response.rows);
+            } else {
+                res.send(err);
+            }
+        });
+    } catch (e) {
+        console.log(e)
+        res.send(e);
+    }
 });
 
-app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
+app.post('/user/:id', async (req, res) => {
+
+    let { password, username, email, id } = req.body;
+    let values = [password, username, email, id];
+    let query = `UPDATE dnrm SET password = $1, username = $2, email = $3 WHERE id = $4;`;
+
+    try {
+        let result = await client.query({
+            rowMode: 'array',
+            text: query,
+            values
+        })
+        res.set({
+            'Set-Cookie': `password=${password}; Secure; HttpOnly; Max-Age: 100`
+        })
+        res.send(result.rows);
+    } catch (e) {
+        res.set({
+            'x-dnrm': 'that aint right O_o',
+        })
+        res.status(500).send({
+            message: "Internal server error",
+            status: 500,
+            ts: new Date().getTime()
+        })
+    }
+})
+
+app.listen(PORT, () => console.log(`http://localhost${PORT == 80 ? '/' : `:${PORT}/`}`));
