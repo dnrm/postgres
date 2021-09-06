@@ -16,7 +16,9 @@ const client = new Client({
 
 client.connect();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+}));
 app.use(express.json())
 
 app.get("/", async (req, res) => {
